@@ -1,6 +1,17 @@
-export type AgentId = "moss" | "rivet" | "specs" | "lumen" | "cricket";
+export type AgentId =
+  | "commander"
+  | "coder"
+  | "qa"
+  | "itops"
+  | "devops"
+  | "music"
+  | "video"
+  | "designer"
+  | "daily"
+  | "research"
+  | "analyst";
 
-export type AgentStatus = "idle" | "thinking" | "working" | "blocked" | "away";
+export type AgentStatus = "idle" | "thinking" | "working" | "blocked" | "away" | "error";
 
 export type LineKind = "cmd" | "out" | "ok" | "warn" | "err" | "sys" | "msg" | "mem";
 
@@ -17,7 +28,7 @@ export interface StreamChunk {
   kind: LineKind;
 }
 
-export type ApprovalKind = "spend" | "delete" | "major";
+export type ApprovalKind = "spend" | "delete" | "production" | "major" | "external";
 
 export interface ApprovalSpec {
   kind: ApprovalKind;
@@ -30,11 +41,11 @@ export interface Step {
   label: string;
   cmd?: string;
   outputs: string[];
-  duration: number; // simulated ms
+  duration: number;
   approval?: ApprovalSpec;
   message?: { to: AgentId; text: string };
   memory?: { kind: MemKind; text: string; scope?: AgentId | "shared" };
-  move?: "desk" | "war" | "coffee" | "center";
+  move?: "desk" | "war" | "studio" | "terminal" | "center";
 }
 
 export interface ActiveTask {
@@ -61,6 +72,8 @@ export interface AgentDef {
   initials: string;
   desk: { x: number; y: number };
   blurb: string;
+  capabilities: string[];
+  defaultProvider: string;
 }
 
 export interface AgentState {
@@ -79,7 +92,7 @@ export interface AgentState {
 
 export interface ChatMsg {
   id: string;
-  from: "user" | "moss";
+  from: "user" | "commander";
   text: string;
   ts: number;
 }
@@ -91,7 +104,7 @@ export interface Packet {
   ts: number;
 }
 
-export type MemKind = "fact" | "decision" | "preference" | "note";
+export type MemKind = "fact" | "decision" | "preference" | "note" | "result";
 
 export interface MemEntry {
   id: string;
@@ -120,15 +133,36 @@ export interface Toast {
   text: string;
 }
 
+export type ProviderId =
+  | "auto"
+  | "openai"
+  | "anthropic"
+  | "gemini"
+  | "codex"
+  | "claude"
+  | "ollama"
+  | "lmstudio"
+  | "qwen"
+  | "opencode"
+  | "custom";
+
 export interface Settings {
   officeName: string;
-  speed: number; // 0.5 | 1 | 2
-  autoApproveBelow: number; // dollars; 0 = always ask
+  speed: number;
+  autoApproveBelow: number;
   baseUrl: string;
   apiKey: string;
   model: string;
+  provider: ProviderId;
   liveRouting: boolean;
   paused: boolean;
+  executionMode: "real" | "simulation";
+  workspaceRoot: string;
+  allowNetwork: boolean;
+  allowShell: boolean;
+  allowBrowser: boolean;
+  allowMedia: boolean;
+  maxParallelAgents: number;
 }
 
 export interface PlanTracker {
@@ -140,7 +174,7 @@ export interface PlanTracker {
 }
 
 export interface InspectorTab {
-  value: "terminal" | "queue" | "memory";
+  value: "terminal" | "queue" | "memory" | "tools" | "activity";
 }
 
 export interface RoutePlan {
